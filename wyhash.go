@@ -24,6 +24,10 @@ func wyhashread16(ptr []byte) uint64 { return uint64(binary.LittleEndian.Uint16(
 func wyhashread08(ptr []byte) uint64 { return uint64(ptr[0]) }
 
 func Hash(key []byte, seed uint64) uint64 {
+	// original wyhash not defined for 0-length strings
+	if len(key) == 0 {
+		return seed
+	}
 
 	ptr := key
 
