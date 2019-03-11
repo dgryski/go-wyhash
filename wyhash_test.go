@@ -268,7 +268,7 @@ func TestWyhash(t *testing.T) {
 		data = append(data, byte(i))
 		got := Hash(data[:i], 0x0102030405060708)
 		if i != 0 && got != want {
-			t.Errorf("Sum64(...%d)=%x, want %x", i, got, want)
+			t.Errorf("Hash(...%d)=%x, want %x", i, got, want)
 		}
 	}
 }
