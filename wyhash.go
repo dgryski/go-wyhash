@@ -102,6 +102,6 @@ func (seed *Rng) Next() uint64 {
 }
 
 func wyrngmix(A, B uint64) uint64 {
-	hi, lo := bits.Mul64(A, B^wyhashp0)
+	hi, lo := bits.Mul64(A, B)
 	return hi ^ lo
 }

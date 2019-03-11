@@ -272,3 +272,32 @@ func TestWyhash(t *testing.T) {
 		}
 	}
 }
+
+var rngvecs = [...]uint64{
+	0x5c71580fe1214a64,
+	0xb8e2b01fc24294c8,
+	0x94a4a556cbbc9f73,
+	0xc8906921124b2e7b,
+	0x108e8fbbe202bca1,
+	0x29494aad97793ee7,
+	0xa03d15d37e53684d,
+	0xb17a26486406b2cb,
+	0xe3fb20382daec5b,
+	0xdccdbce2ac342071,
+	0xbf0a5f719ab6217c,
+	0x8894941b4ce47dcc,
+	0x6950555951394979,
+	0x6f8a1c1790783c1e,
+	0xc4c52b2dadb8abf7,
+	0x68f74ca2160d7927,
+}
+
+func TestRng(t *testing.T) {
+	var r = Rng(0)
+	for i, want := range rngvecs {
+		got := r.Next()
+		if got != want {
+			t.Errorf("rng.Next()[%d]=%x, want %x", i, got, want)
+		}
+	}
+}
