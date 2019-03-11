@@ -24,21 +24,14 @@ func wyhashread16(ptr []byte) uint64 { return uint64(binary.LittleEndian.Uint16(
 func wyhashread08(ptr []byte) uint64 { return uint64(ptr[0]) }
 
 func Hash(key []byte, seed uint64) uint64 {
-	// original wyhash not defined for 0-length strings
-	if len(key) == 0 {
-		return seed
-	}
-
 	ptr := key
 
-	for len(ptr) > 32 {
+	for len(ptr) >= 32 {
 		seed = wyhashmix(seed^wyhashp1, wyhashread64(ptr[:8])) ^ wyhashmix(seed^wyhashp2, wyhashread64(ptr[8:16])) ^ wyhashmix(seed^wyhashp3, wyhashread64(ptr[16:24])) ^ wyhashmix(seed^wyhashp4, wyhashread64(ptr[24:32]))
 		ptr = ptr[32:]
 	}
 
-	switch len(key) & 31 {
-	case 0:
-		seed = wyhashmix(seed^wyhashp1, wyhashread64(ptr)) ^ wyhashmix(seed^wyhashp2, wyhashread64(ptr[8:])) ^ wyhashmix(seed^wyhashp3, wyhashread64(ptr[16:])) ^ wyhashmix(seed^wyhashp4, wyhashread64(ptr[24:]))
+	switch len(ptr) {
 	case 1:
 		seed = wyhashmix(seed^wyhashp1, wyhashread08(ptr))
 	case 2:
