@@ -105,15 +105,6 @@ func Hash(key []byte, seed uint64) uint64 {
 	return wyhashmix(seed, uint64(len(key)))
 }
 
-func wyhashmix32(A, B uint32) uint32 {
-	r := uint64(A) * uint64(B)
-	return uint32((r >> 32) ^ r)
-}
-
-func wyhash32(A, B uint32) uint32 {
-	return wyhashmix32(wyhashmix32(A^0x7b16763, B^0xe4f5a905), 0x4a9e6939)
-}
-
 type Rng uint64
 
 func (seed *Rng) Next() uint64 {
