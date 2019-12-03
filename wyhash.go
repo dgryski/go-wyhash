@@ -38,13 +38,13 @@ func Hash(key []byte, seed uint64) uint64 {
 	switch {
 	case len(p) < 4:
 		return wymum(wymum(wyr3(p)^seed^wyp0, seed^wyp1)^seed, uint64(len(p))^wyp4)
-	case (len(p) <= 8):
+	case len(p) <= 8:
 		return wymum(wymum(uint64(binary.LittleEndian.Uint32(p[:4]))^seed^wyp0, uint64(binary.LittleEndian.Uint32(p[len(p)-4:len(p)-4+4]))^seed^wyp1)^seed, uint64(len(p))^wyp4)
-	case (len(p) <= 16):
+	case len(p) <= 16:
 		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[len(p)-8:])^seed^wyp1)^seed, uint64(len(p))^wyp4)
-	case (len(p) <= 24):
+	case len(p) <= 24:
 		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)^wymum(wyr8mix(p[len(key)-8:])^seed^wyp2, seed^wyp3), uint64(len(p))^wyp4)
-	case (len(p) <= 32):
+	case len(p) <= 32:
 		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)^wymum(wyr8mix(p[16:])^seed^wyp2, wyr8mix(p[len(key)-8:])^seed^wyp3), uint64(len(p))^wyp4)
 
 	}
@@ -72,11 +72,11 @@ func Hash(key []byte, seed uint64) uint64 {
 	switch {
 	case len(p) < 4:
 		seed = wymum(wyr3(p)^seed^wyp0, seed^wyp1)
-	case (len(p) <= 8):
+	case len(p) <= 8:
 		seed = wymum(uint64(binary.LittleEndian.Uint32(p[:4]))^seed^wyp0, uint64(binary.LittleEndian.Uint32(p[len(p)-4:len(p)-4+4]))^seed^wyp1)
-	case (len(p) <= 16):
+	case len(p) <= 16:
 		seed = wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[len(p)-8:])^seed^wyp1)
-	case (len(p) <= 24):
+	case len(p) <= 24:
 		seed = wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)
 		see1 = wymum(wyr8mix(p[len(p)-8:])^see1^wyp2, see1^wyp3)
 	default:
