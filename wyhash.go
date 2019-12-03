@@ -19,7 +19,8 @@ func wymum(A, B uint64) uint64 {
 	return hi ^ lo
 }
 
-func wyr3(p []byte, k int) uint64 {
+func wyr3(p []byte) uint64 {
+	k := len(p)
 	return (uint64(p[0]) << 16) | (uint64(p[k>>1]) << 8) | uint64(p[k-1])
 }
 
@@ -44,7 +45,7 @@ func Hash(key []byte, seed uint64) uint64 {
 
 	switch {
 	case len(p) < 4:
-		return wymum(wymum(wyr3(p, len(p))^seed^wyp0, seed^wyp1)^seed, uint64(len(p))^wyp4)
+		return wymum(wymum(wyr3(p)^seed^wyp0, seed^wyp1)^seed, uint64(len(p))^wyp4)
 	case (len(p) <= 8):
 		return wymum(wymum(wyr4(p)^seed^wyp0, wyr4(p[len(p)-4:])^seed^wyp1)^seed, uint64(len(p))^wyp4)
 	case (len(p) <= 16):
@@ -78,7 +79,7 @@ func Hash(key []byte, seed uint64) uint64 {
 
 	switch {
 	case len(p) < 4:
-		seed = wymum(wyr3(p, len(p))^seed^wyp0, seed^wyp1)
+		seed = wymum(wyr3(p)^seed^wyp0, seed^wyp1)
 	case (len(p) <= 8):
 		seed = wymum(wyr4(p)^seed^wyp0, wyr4(p[len(p)-4:])^seed^wyp1)
 	case (len(p) <= 16):
