@@ -19,84 +19,83 @@ func wymum(A, B uint64) uint64 {
 	return hi ^ lo
 }
 
-func wyr64x32(p []byte) uint64 {
-	return uint64(binary.LittleEndian.Uint32(p[:4]))<<32 | uint64(binary.LittleEndian.Uint32(p[4:8]))
+func wyr3(p []byte, k int) uint64 {
+	return (uint64(p[0]) << 16) | (uint64(p[k>>1]) << 8) | uint64(p[k-1])
+}
+
+func wyr4(p []byte) uint64 {
+	return uint64(binary.LittleEndian.Uint32(p))
+}
+
+func wyr8(p []byte) uint64 {
+	return uint64(binary.LittleEndian.Uint64(p))
+}
+
+func wyr8mix(p []byte) uint64 {
+	return uint64(binary.LittleEndian.Uint32(p))<<32 | uint64(binary.LittleEndian.Uint32(p[4:]))
 }
 
 func Hash(key []byte, seed uint64) uint64 {
 	p := key
 
-	for len(p) >= 32 {
-		seed = wymum(seed^wyp0, wymum(uint64(binary.LittleEndian.Uint64(p[:8]))^wyp1, uint64(binary.LittleEndian.Uint64(p[8:8+8]))^wyp2)^wymum(uint64(binary.LittleEndian.Uint64(p[16:16+8]))^wyp3, uint64(binary.LittleEndian.Uint64(p[24:24+8]))^wyp4))
+	if len(p) == 0 {
+		return seed
+	}
+
+	switch {
+	case len(p) < 4:
+		return wymum(wymum(wyr3(p, len(p))^seed^wyp0, seed^wyp1)^seed, uint64(len(p))^wyp4)
+	case (len(p) <= 8):
+		return wymum(wymum(wyr4(p)^seed^wyp0, wyr4(p[len(p)-4:])^seed^wyp1)^seed, uint64(len(p))^wyp4)
+	case (len(p) <= 16):
+		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[len(p)-8:])^seed^wyp1)^seed, uint64(len(p))^wyp4)
+	case (len(p) <= 24):
+		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)^wymum(wyr8mix(p[len(key)-8:])^seed^wyp2, seed^wyp3), uint64(len(p))^wyp4)
+	case (len(p) <= 32):
+		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)^wymum(wyr8mix(p[16:])^seed^wyp2, wyr8mix(p[len(key)-8:])^seed^wyp3), uint64(len(p))^wyp4)
+
+	}
+
+	see1 := seed
+	i := len(p)
+
+	for i > 256 {
+		seed = wymum(wyr8(p)^seed^wyp0, wyr8(p[8:])^seed^wyp1) ^ wymum(wyr8(p[16:])^seed^wyp2, wyr8(p[24:])^seed^wyp3)
+		see1 = wymum(wyr8(p[32:])^see1^wyp1, wyr8(p[40:])^see1^wyp2) ^ wymum(wyr8(p[48:])^see1^wyp3, wyr8(p[56:])^see1^wyp0)
+		seed = wymum(wyr8(p[64:])^seed^wyp0, wyr8(p[72:])^seed^wyp1) ^ wymum(wyr8(p[80:])^seed^wyp2, wyr8(p[88:])^seed^wyp3)
+		see1 = wymum(wyr8(p[96:])^see1^wyp1, wyr8(p[104:])^see1^wyp2) ^ wymum(wyr8(p[112:])^see1^wyp3, wyr8(p[120:])^see1^wyp0)
+		seed = wymum(wyr8(p[128:])^seed^wyp0, wyr8(p[136:])^seed^wyp1) ^ wymum(wyr8(p[144:])^seed^wyp2, wyr8(p[152:])^seed^wyp3)
+		see1 = wymum(wyr8(p[160:])^see1^wyp1, wyr8(p[168:])^see1^wyp2) ^ wymum(wyr8(p[176:])^see1^wyp3, wyr8(p[184:])^see1^wyp0)
+		seed = wymum(wyr8(p[192:])^seed^wyp0, wyr8(p[200:])^seed^wyp1) ^ wymum(wyr8(p[208:])^seed^wyp2, wyr8(p[216:])^seed^wyp3)
+		see1 = wymum(wyr8(p[224:])^see1^wyp1, wyr8(p[232:])^see1^wyp2) ^ wymum(wyr8(p[240:])^see1^wyp3, wyr8(p[248:])^see1^wyp0)
+		i -= 256
+		p = p[256:]
+	}
+
+	for i > 32 {
+		seed = wymum(wyr8(p)^seed^wyp0, wyr8(p[8:])^seed^wyp1)
+		see1 = wymum(wyr8(p[16:])^see1^wyp2, wyr8(p[24:])^see1^wyp3)
+		i -= 32
 		p = p[32:]
 	}
 
-	seed ^= wyp0
-	switch len(p) {
-	case 1:
-		seed = wymum(seed, uint64(p[0])^wyp1)
-	case 2:
-		seed = wymum(seed, uint64(binary.LittleEndian.Uint16(p[:2]))^wyp1)
-	case 3:
-		seed = wymum(seed, ((uint64(binary.LittleEndian.Uint16(p[:2]))<<8)|uint64(p[2]))^wyp1)
-	case 4:
-		seed = wymum(seed, uint64(binary.LittleEndian.Uint32(p[:4]))^wyp1)
-	case 5:
-		seed = wymum(seed, ((uint64(binary.LittleEndian.Uint32(p[:4]))<<8)|uint64(p[4]))^wyp1)
-	case 6:
-		seed = wymum(seed, ((uint64(binary.LittleEndian.Uint32(p[:4]))<<16)|uint64(binary.LittleEndian.Uint16(p[4:4+2])))^wyp1)
-	case 7:
-		seed = wymum(seed, ((uint64(binary.LittleEndian.Uint32(p[:4]))<<24)|(uint64(binary.LittleEndian.Uint16(p[4:4+2]))<<8)|uint64(p[6]))^wyp1)
-	case 8:
-		seed = wymum(seed, wyr64x32(p)^wyp1)
-	case 9:
-		seed = wymum(wyr64x32(p)^seed, uint64(p[8])^wyp2)
-	case 10:
-		seed = wymum(wyr64x32(p)^seed, uint64(binary.LittleEndian.Uint16(p[8:8+2]))^wyp2)
-	case 11:
-		seed = wymum(wyr64x32(p)^seed, ((uint64(binary.LittleEndian.Uint16(p[8:8+2]))<<8)|uint64(p[8+2]))^wyp2)
-	case 12:
-		seed = wymum(wyr64x32(p)^seed, uint64(binary.LittleEndian.Uint32(p[8:8+4]))^wyp2)
-	case 13:
-		seed = wymum(wyr64x32(p)^seed, ((uint64(binary.LittleEndian.Uint32(p[8:8+4]))<<8)|uint64(p[8+4]))^wyp2)
-	case 14:
-		seed = wymum(wyr64x32(p)^seed, ((uint64(binary.LittleEndian.Uint32(p[8:8+4]))<<16)|uint64(binary.LittleEndian.Uint16(p[8+4:8+4+2])))^wyp2)
-	case 15:
-		seed = wymum(wyr64x32(p)^seed, ((uint64(binary.LittleEndian.Uint32(p[8:8+4]))<<24)|(uint64(binary.LittleEndian.Uint16(p[8+4:8+4+2]))<<8)|uint64(p[8+6]))^wyp2)
-	case 16:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2)
-	case 17:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, uint64(p[16])^wyp3)
-	case 18:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, uint64(binary.LittleEndian.Uint16(p[16:16+2]))^wyp3)
-	case 19:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, ((uint64(binary.LittleEndian.Uint16(p[16:16+2]))<<8)|uint64(p[16+2]))^wyp3)
-	case 20:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, uint64(binary.LittleEndian.Uint32(p[16:16+4]))^wyp3)
-	case 21:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, ((uint64(binary.LittleEndian.Uint32(p[16:16+4]))<<8)|uint64(p[16+4]))^wyp3)
-	case 22:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, ((uint64(binary.LittleEndian.Uint32(p[16:16+4]))<<16)|uint64(binary.LittleEndian.Uint16(p[16+4:16+4+2])))^wyp3)
-	case 23:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, ((uint64(binary.LittleEndian.Uint32(p[16:16+4]))<<24)|(uint64(binary.LittleEndian.Uint16(p[16+4:16+4+2]))<<8)|uint64(p[16+6]))^wyp3)
-	case 24:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(seed, wyr64x32(p[16:])^wyp3)
-	case 25:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, uint64(p[24])^wyp4)
-	case 26:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, uint64(binary.LittleEndian.Uint16(p[24:24+2]))^wyp4)
-	case 27:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, ((uint64(binary.LittleEndian.Uint16(p[24:24+2]))<<8)|uint64(p[24+2]))^wyp4)
-	case 28:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, uint64(binary.LittleEndian.Uint32(p[24:24+4]))^wyp4)
-	case 29:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, ((uint64(binary.LittleEndian.Uint32(p[24:24+4]))<<8)|uint64(p[24+4]))^wyp4)
-	case 30:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, ((uint64(binary.LittleEndian.Uint32(p[24:24+4]))<<16)|uint64(binary.LittleEndian.Uint16(p[24+4:24+4+2])))^wyp4)
-	case 31:
-		seed = wymum(wyr64x32(p)^seed, wyr64x32(p[8:])^wyp2) ^ wymum(wyr64x32(p[16:])^seed, ((uint64(binary.LittleEndian.Uint32(p[24:24+4]))<<24)|(uint64(binary.LittleEndian.Uint16(p[24+4:24+4+2]))<<8)|uint64(p[24+6]))^wyp4)
+	switch {
+	case i < 4:
+		seed = wymum(wyr3(p, i)^seed^wyp0, seed^wyp1)
+	case (i <= 8):
+		seed = wymum(wyr4(p)^seed^wyp0, wyr4(p[i-4:])^seed^wyp1)
+	case (i <= 16):
+		seed = wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[i-8:])^seed^wyp1)
+	case (i <= 24):
+		seed = wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)
+		see1 = wymum(wyr8mix(p[i-8:])^see1^wyp2, see1^wyp3)
+	default:
+		seed = wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[8:])^seed^wyp1)
+		see1 = wymum(wyr8mix(p[16:])^see1^wyp2, wyr8mix(p[i-8:])^see1^wyp3)
+
 	}
-	return wymum(seed, uint64(len(key))^wyp5)
+
+	return wymum(seed^see1, uint64(len(key))^wyp4)
 }
 
 type Rng uint64
