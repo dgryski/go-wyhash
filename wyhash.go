@@ -60,20 +60,20 @@ func Hash(key []byte, seed uint64) uint64 {
 	see1 := seed
 
 	for len(p) > 256 {
-		seed = wymum(wyr8(p)^seed^wyp0, wyr8(p[8:])^seed^wyp1) ^ wymum(wyr8(p[16:])^seed^wyp2, wyr8(p[24:])^seed^wyp3)
-		see1 = wymum(wyr8(p[32:])^see1^wyp1, wyr8(p[40:])^see1^wyp2) ^ wymum(wyr8(p[48:])^see1^wyp3, wyr8(p[56:])^see1^wyp0)
-		seed = wymum(wyr8(p[64:])^seed^wyp0, wyr8(p[72:])^seed^wyp1) ^ wymum(wyr8(p[80:])^seed^wyp2, wyr8(p[88:])^seed^wyp3)
-		see1 = wymum(wyr8(p[96:])^see1^wyp1, wyr8(p[104:])^see1^wyp2) ^ wymum(wyr8(p[112:])^see1^wyp3, wyr8(p[120:])^see1^wyp0)
-		seed = wymum(wyr8(p[128:])^seed^wyp0, wyr8(p[136:])^seed^wyp1) ^ wymum(wyr8(p[144:])^seed^wyp2, wyr8(p[152:])^seed^wyp3)
-		see1 = wymum(wyr8(p[160:])^see1^wyp1, wyr8(p[168:])^see1^wyp2) ^ wymum(wyr8(p[176:])^see1^wyp3, wyr8(p[184:])^see1^wyp0)
-		seed = wymum(wyr8(p[192:])^seed^wyp0, wyr8(p[200:])^seed^wyp1) ^ wymum(wyr8(p[208:])^seed^wyp2, wyr8(p[216:])^seed^wyp3)
-		see1 = wymum(wyr8(p[224:])^see1^wyp1, wyr8(p[232:])^see1^wyp2) ^ wymum(wyr8(p[240:])^see1^wyp3, wyr8(p[248:])^see1^wyp0)
+		seed = wymum(wyr8(p)^seed^wyp0, binary.LittleEndian.Uint64(p[8:8+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[16:16+8])^seed^wyp2, binary.LittleEndian.Uint64(p[24:24+8])^seed^wyp3)
+		see1 = wymum(binary.LittleEndian.Uint64(p[32:32+8])^see1^wyp1, binary.LittleEndian.Uint64(p[40:40+8])^see1^wyp2) ^ wymum(binary.LittleEndian.Uint64(p[48:48+8])^see1^wyp3, binary.LittleEndian.Uint64(p[56:56+8])^see1^wyp0)
+		seed = wymum(binary.LittleEndian.Uint64(p[64:64+8])^seed^wyp0, binary.LittleEndian.Uint64(p[72:72+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[80:80+8])^seed^wyp2, binary.LittleEndian.Uint64(p[88:88+8])^seed^wyp3)
+		see1 = wymum(binary.LittleEndian.Uint64(p[96:96+8])^see1^wyp1, binary.LittleEndian.Uint64(p[104:104+8])^see1^wyp2) ^ wymum(binary.LittleEndian.Uint64(p[112:112+8])^see1^wyp3, binary.LittleEndian.Uint64(p[120:120+8])^see1^wyp0)
+		seed = wymum(binary.LittleEndian.Uint64(p[128:128+8])^seed^wyp0, binary.LittleEndian.Uint64(p[136:136+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[144:144+8])^seed^wyp2, binary.LittleEndian.Uint64(p[152:152+8])^seed^wyp3)
+		see1 = wymum(binary.LittleEndian.Uint64(p[160:160+8])^see1^wyp1, binary.LittleEndian.Uint64(p[168:168+8])^see1^wyp2) ^ wymum(binary.LittleEndian.Uint64(p[176:176+8])^see1^wyp3, binary.LittleEndian.Uint64(p[184:184+8])^see1^wyp0)
+		seed = wymum(binary.LittleEndian.Uint64(p[192:192+8])^seed^wyp0, binary.LittleEndian.Uint64(p[200:200+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[208:208+8])^seed^wyp2, binary.LittleEndian.Uint64(p[216:216+8])^seed^wyp3)
+		see1 = wymum(binary.LittleEndian.Uint64(p[224:224+8])^see1^wyp1, binary.LittleEndian.Uint64(p[232:232+8])^see1^wyp2) ^ wymum(binary.LittleEndian.Uint64(p[240:240+8])^see1^wyp3, binary.LittleEndian.Uint64(p[248:248+8])^see1^wyp0)
 		p = p[256:]
 	}
 
 	for len(p) > 32 {
-		seed = wymum(wyr8(p)^seed^wyp0, wyr8(p[8:])^seed^wyp1)
-		see1 = wymum(wyr8(p[16:])^see1^wyp2, wyr8(p[24:])^see1^wyp3)
+		seed = wymum(wyr8(p)^seed^wyp0, binary.LittleEndian.Uint64(p[8:8+8])^seed^wyp1)
+		see1 = wymum(binary.LittleEndian.Uint64(p[16:16+8])^see1^wyp2, binary.LittleEndian.Uint64(p[24:24+8])^see1^wyp3)
 		p = p[32:]
 	}
 
