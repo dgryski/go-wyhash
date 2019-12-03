@@ -24,14 +24,6 @@ func wyr3(p []byte) uint64 {
 	return (uint64(p[0]) << 16) | (uint64(p[k>>1]) << 8) | uint64(p[k-1])
 }
 
-func wyr4(p []byte) uint64 {
-	return uint64(binary.LittleEndian.Uint32(p[:4]))
-}
-
-func wyr8(p []byte) uint64 {
-	return uint64(binary.LittleEndian.Uint64(p[:8]))
-}
-
 func wyr8mix(p []byte) uint64 {
 	return uint64(binary.LittleEndian.Uint32(p[:4]))<<32 | uint64(binary.LittleEndian.Uint32(p[4:8]))
 }
@@ -47,7 +39,7 @@ func Hash(key []byte, seed uint64) uint64 {
 	case len(p) < 4:
 		return wymum(wymum(wyr3(p)^seed^wyp0, seed^wyp1)^seed, uint64(len(p))^wyp4)
 	case (len(p) <= 8):
-		return wymum(wymum(wyr4(p)^seed^wyp0, wyr4(p[len(p)-4:])^seed^wyp1)^seed, uint64(len(p))^wyp4)
+		return wymum(wymum(uint64(binary.LittleEndian.Uint32(p[:4]))^seed^wyp0, uint64(binary.LittleEndian.Uint32(p[len(p)-4:len(p)-4+4]))^seed^wyp1)^seed, uint64(len(p))^wyp4)
 	case (len(p) <= 16):
 		return wymum(wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[len(p)-8:])^seed^wyp1)^seed, uint64(len(p))^wyp4)
 	case (len(p) <= 24):
@@ -60,7 +52,7 @@ func Hash(key []byte, seed uint64) uint64 {
 	see1 := seed
 
 	for len(p) > 256 {
-		seed = wymum(wyr8(p)^seed^wyp0, binary.LittleEndian.Uint64(p[8:8+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[16:16+8])^seed^wyp2, binary.LittleEndian.Uint64(p[24:24+8])^seed^wyp3)
+		seed = wymum(binary.LittleEndian.Uint64(p[:8])^seed^wyp0, binary.LittleEndian.Uint64(p[8:8+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[16:16+8])^seed^wyp2, binary.LittleEndian.Uint64(p[24:24+8])^seed^wyp3)
 		see1 = wymum(binary.LittleEndian.Uint64(p[32:32+8])^see1^wyp1, binary.LittleEndian.Uint64(p[40:40+8])^see1^wyp2) ^ wymum(binary.LittleEndian.Uint64(p[48:48+8])^see1^wyp3, binary.LittleEndian.Uint64(p[56:56+8])^see1^wyp0)
 		seed = wymum(binary.LittleEndian.Uint64(p[64:64+8])^seed^wyp0, binary.LittleEndian.Uint64(p[72:72+8])^seed^wyp1) ^ wymum(binary.LittleEndian.Uint64(p[80:80+8])^seed^wyp2, binary.LittleEndian.Uint64(p[88:88+8])^seed^wyp3)
 		see1 = wymum(binary.LittleEndian.Uint64(p[96:96+8])^see1^wyp1, binary.LittleEndian.Uint64(p[104:104+8])^see1^wyp2) ^ wymum(binary.LittleEndian.Uint64(p[112:112+8])^see1^wyp3, binary.LittleEndian.Uint64(p[120:120+8])^see1^wyp0)
@@ -72,7 +64,7 @@ func Hash(key []byte, seed uint64) uint64 {
 	}
 
 	for len(p) > 32 {
-		seed = wymum(wyr8(p)^seed^wyp0, binary.LittleEndian.Uint64(p[8:8+8])^seed^wyp1)
+		seed = wymum(binary.LittleEndian.Uint64(p[:8])^seed^wyp0, binary.LittleEndian.Uint64(p[8:8+8])^seed^wyp1)
 		see1 = wymum(binary.LittleEndian.Uint64(p[16:16+8])^see1^wyp2, binary.LittleEndian.Uint64(p[24:24+8])^see1^wyp3)
 		p = p[32:]
 	}
@@ -81,7 +73,7 @@ func Hash(key []byte, seed uint64) uint64 {
 	case len(p) < 4:
 		seed = wymum(wyr3(p)^seed^wyp0, seed^wyp1)
 	case (len(p) <= 8):
-		seed = wymum(wyr4(p)^seed^wyp0, wyr4(p[len(p)-4:])^seed^wyp1)
+		seed = wymum(uint64(binary.LittleEndian.Uint32(p[:4]))^seed^wyp0, uint64(binary.LittleEndian.Uint32(p[len(p)-4:len(p)-4+4]))^seed^wyp1)
 	case (len(p) <= 16):
 		seed = wymum(wyr8mix(p)^seed^wyp0, wyr8mix(p[len(p)-8:])^seed^wyp1)
 	case (len(p) <= 24):
