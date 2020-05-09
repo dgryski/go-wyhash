@@ -28,6 +28,10 @@ func wyr8mix(p []byte) uint64 {
 	return uint64(binary.LittleEndian.Uint32(p[:4]))<<32 | uint64(binary.LittleEndian.Uint32(p[4:8]))
 }
 
+func Hash32Low(p []byte, seed uint32) uint32 {
+	return uint32(0xFFFFFFFF & Hash(p, uint64(seed)))
+}
+
 func Hash(key []byte, seed uint64) uint64 {
 	p := key
 
