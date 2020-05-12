@@ -29,7 +29,7 @@ func wyr8mix(p []byte) uint64 {
 }
 
 func Hash32Low(p []byte, seed uint32) uint32 {
-	return uint32(0xFFFFFFFF & Hash(p, uint64(seed)))
+	return uint32(Hash(p, uint64(seed)))
 }
 
 func Hash(key []byte, seed uint64) uint64 {
